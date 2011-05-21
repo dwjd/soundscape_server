@@ -1,48 +1,26 @@
-var foursquare = require("node-foursquare").Foursquare();
 var app = require('express').createServer();
-var foursquare_token = '';
+var request = require('request');
 
-CLIENT_ID = 'JAQQS11NSBCQEP3RBZAVITCME54S3FSCWAZ1204KS1TMNRJY'
-CLIENT_SECRET = 'CLTMSOONEQ2HY4Y55RGJFUAWDRTQ5TIJ0XTIR3T4ZFL0STPF'
-YOUR_REDIRECT = 'soundscape.com/auth/foursquare'
-
-app.get('/login', function(req, res) {
-  var url = Foursquare.getAuthClientRedirectUrl([CLIENT_ID], [YOUR_REDIRECT]);
-  res.writeHead(303, { "location": url });
-  res.end();
-});
-
-app.get('/callback', function (req, res) {
-  var code = req.query.code;
-
-  Foursquare.getAccessToken({
-    code: code,
-    redirect_uri: [YOUR_REDIRECT],
-    client_id: [CLIENT_ID],
-    client_secret: [CLIENT_SECRET]
-  }, function (error, accessToken) {
-    if(error) {
-      res.send("An error was thrown: " + error.message);
-    }
-    else {
-      // Save the accessToken and redirect.
-      foursquare_token = accessToken
-      // call /venue with latitude and longitude ...
-      res.writeHead(303, { "location": '/venue' })
-    }
-  });
-});
-
+app.get('/where', function(req, res) {
+  sys.puts(navigator.geolocation)
+}
 
 // what venue is this?
 app.get('/venue', function(req, res) {
+  var location = navigator.geolocation
+  sys.puts(location)
+  request({uri:'https://api.foursquare.com/v2/venues/search?client_id=JAQQS11NSBCQEP3RBZAVITCME54S3FSCWAZ1204KS1TMNRJY&client_secret=CLTMSOONEQ2HY4Y55RGJFUAWDRTQ5TIJ0XTIR3T4ZFL0STPF&ll='}, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      sys.puts(body) // Print the google web page.
+    }
+  })
   // get list of venues from foursquare
   // sort by our venue database by number of tags
   // return sorted list
   res.send('user' + req.params.id);
 });
 
-get song
-  fake data  
-get /[venues]
-put / tag (song, user, venue)
+// get song
+//  fake data  
+// get /[venues]
+// put / tag (song, user, venue)
