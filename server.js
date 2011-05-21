@@ -40,25 +40,28 @@ mongoose.model('Person', Person)
 mongoose.model('Song', Song)
 mongoose.model('Venue', Venue)
 mongoose.model('Tag', Tag)
+
 var app = require('express').createServer();
 var request = require('request');
 var sys = require('sys');
 
-// what venue is this?
+// get a list of the most likely venues
 app.get('/venue', function(req, res) {
+  // get list of venues from foursquare
   request({uri:'https://api.foursquare.com/v2/venues/search?client_id=JAQQS11NSBCQEP3RBZAVITCME54S3FSCWAZ1204KS1TMNRJY&client_secret=CLTMSOONEQ2HY4Y55RGJFUAWDRTQ5TIJ0XTIR3T4ZFL0STPF&ll='+req.ll}, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       sys.puts(body)
+      // sort by our venue database by number of tags
+      // return sorted list
     }
   })
-  // get list of venues from foursquare
-  // sort by our venue database by number of tags
-  // return sorted list
 });
 
-app.listen(3000);
+// tag a song
+app.put('/tag', function(req, res) {
+  req.song
+  req.user
+  req.venue
+}); 
 
-// get song
-//  fake data  
-// get /[venues]
-// put / tag (song, user, venue)
+app.listen(3000);
