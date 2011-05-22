@@ -133,7 +133,7 @@ app.get('/tag/:user/:like/:song/:venue'
     tag.song = req.params.song;
     tag.like = true;
     if (req.params.like==0) { tag.like = false; }
-    tag.save(basic_error_handling)
+    tag.save()
   }
 ); 
 
@@ -166,7 +166,7 @@ app.get('/user/:email/:name/:phone'
       person.name = req.params.name;
       person.email = req.params.email;
       person.phone = req.params.phone;
-      person.save(basic_error_handling); 
+      person.save(); 
     }
 
     res.send(person);
