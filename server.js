@@ -58,7 +58,6 @@ app.get('/venue/:list/:ll', function(req, res) {
       if (!error && response.statusCode == 200) {
         // grab possible venues from underscore
         var vs = underscore.first(underscore.select(JSON.parse(body).response.groups, function(group) { return group.type == req.params.list })).items;
-        //sys.puts(JSON.stringify(vs));
         for ( var i=0, len=vs.length; i<len; ++i ){
           var v = vs[i];
           var venue = Venues.findById(v.id);
@@ -92,7 +91,6 @@ var get_song = function(code) {
   , function (error, response, body) {
       Song = mongoose.model('Song');
       var song = null;
-      sys.puts('status: ' + response.statusCode);
 
       if (!error && response.statusCode == 200) {
 
@@ -118,7 +116,6 @@ var get_song = function(code) {
           song.id = underscore.first(songs).id
           song.save();
         }
-        sys.puts(JSON.stringify(song));
 
         return song;
       }
