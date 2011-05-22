@@ -76,7 +76,7 @@ app.get('/venue/:list/:ll', function(req, res) {
           venues.push(venue);
         }
       }
-      sys.puts(JSON.stringify(venues));
+      res.send(venues);
     })
 });
 
@@ -126,32 +126,63 @@ var get_song = function(code) {
 };
 
 // tag a song
-app.put('/tag/:user/:venue/:song', function(req, res) {
+app.get('/tag/:user/:venue/:song', function(req, res) {
+  Tags = mongoose.model('Tags');
   var tag = new Tags();
 
-  // user == email
-  tag.user = JSON.parse(req.params.user);
-  // venue == 
-  tag.venue = JSON.parse(req.params.venue);
-  tag.song = JSON.parse(req.params.song);
+  tag.user = req.params.user;
+  tag.venue = req.params.venue;
+  tag.song = req.params.song;
 
   tag.save(basic_error_handling)
 }); 
 
-app.get('/user/:user', function(req, res) {
-  res.send('users here');
+// get a user's tags
+app.get('/:user/tags', function(req, res) {
+  Tags = mongoose.model('Tags');
+  var tags = Tags.find({'user': req.params.user}, {}, {}, lol_error_handling);
+  res.send(tags);
+}
+
+// add a user
+app.get('/user/:name/:email/:phone', function(req, res) {
+  Person = mongoose.model('Person');
+
+  var person = Person.find({'email': req.params.email}, {}, {}, lol_error_handling);
+
+  if ( person == null ) {
+    person = new Person();
+
+    person.name = req.params.name;
+    person.email = req.params.email;
+    person.phone = req.params.phone;
+  
+    person.save(basic_error_handling); 
+  }
+
+  res.send(person);
+}
+
+// find user 
+app.get('/user/:email', function(req, res) {
+  Person = mongoose.model('Person');
+  var person = Person.find({'email': req.params.email}, {}, {}, lol_error_handling);
+  res.send(person);
 });
 
 
 // get the last tags of a venue
 app.get('/venue/:venue/tags', function(req, res) {
-  var tags = Tags.find({'venue': req.params.venue}, {}, {'limit': 10}, lol_error_handling);
+  Venues = mongoose.model('Venues');
+  var tags = Tags.find({'name': req.params.venue}, {}, {'limit': 10}, lol_error_handling);
   res.send(tags);
 });
 
 // get venue info
 app.get('/venue/:venue', function(req, res) {
-  Venues.find({'venue': req.params.venue}, {}, {}, lol_error_handling)
+  Venues = mongoose.model('Venues');
+  var venues = Venues.find({'name': req.params.venue}, {}, {}, lol_error_handling)
+  res.send(venues)
 });
 
 // basic error handling
