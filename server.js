@@ -120,7 +120,7 @@ app.get('/song/:code'
 });
 
 // tag a song
-app.get('/tag/:user/:venue/:song', function(req, res) {
+app.get('/tag/:user/:song/:venue', function(req, res) {
   Tags = mongoose.model('Tags');
   var tag = new Tags();
 
@@ -132,14 +132,14 @@ app.get('/tag/:user/:venue/:song', function(req, res) {
 }); 
 
 // get a user's tags
-app.get('/:user/tags', function(req, res) {
+app.get('/user/:email/tags', function(req, res) {
   Tags = mongoose.model('Tags');
-  var tags = Tags.find({'user': req.params.user}, {}, {}, lol_error_handling);
+  var tags = Tags.find({'user': req.params.email}, {}, {}, lol_error_handling);
   res.send(tags);
 });
 
 // add a user
-app.get('/user/:name/:email/:phone', function(req, res) {
+app.get('/user/:email/:name/:phone', function(req, res) {
   Person = mongoose.model('Person');
 
   var person = Person.find({'email': req.params.email}, {}, {}, lol_error_handling);
@@ -166,16 +166,16 @@ app.get('/user/:email', function(req, res) {
 
 
 // get the last tags of a venue
-app.get('/venue/:venue/tags', function(req, res) {
+app.get('/venue/:name/tags', function(req, res) {
   Venues = mongoose.model('Venues');
-  var tags = Tags.find({'name': req.params.venue}, {}, {'limit': 10}, lol_error_handling);
+  var tags = Tags.find({'name': req.params.name}, {}, {'limit': 10}, lol_error_handling);
   res.send(tags);
 });
 
 // get venue info
-app.get('/venue/:venue', function(req, res) {
+app.get('/venue/:name', function(req, res) {
   Venues = mongoose.model('Venues');
-  var venues = Venues.find({'name': req.params.venue}, {}, {}, lol_error_handling)
+  var venues = Venues.find({'name': req.params.name}, {}, {}, lol_error_handling)
   res.send(venues)
 });
 
