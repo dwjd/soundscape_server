@@ -141,8 +141,11 @@ app.get('/tag/:user/:like/:song/:venue'
 app.get('/user/:email/tags'
 , function(req, res) {
     Tags = mongoose.model('Tags');
-    var tags = Tags.find({'user': req.params.email}, {}, {}, lol_error_handling);
-    res.send(tags);
+    Tags.find({'user': req.params.email}, {}, {}
+    , function(err, tags) {
+        res.send(tags);
+      }
+    );
   }
 );
 
@@ -169,8 +172,11 @@ app.get('/user/:email/:name/:phone'
 app.get('/user/:email'
 , function(req, res) {
     Person = mongoose.model('Person');
-    var person = Person.find({'email': req.params.email}, {}, {}, lol_error_handling);
-    res.send(person);
+    Person.findOne({email: req.params.email}
+    , function(err, person) {
+        res.send(person);
+      }
+    );
   }
 );
 
@@ -179,8 +185,11 @@ app.get('/user/:email'
 app.get('/venue/:name/tags'
 , function(req, res) {
     Venues = mongoose.model('Venues');
-    var tags = Tags.find({'name': req.params.name}, {}, {'limit': 10}, lol_error_handling);
-    res.send(tags);
+    Tags.find({name: req.params.name}, {}, {'limit': 10}
+    , function(err, tags) {
+        res.send(tags);
+      }
+    );
   }
 );
 
@@ -188,19 +197,12 @@ app.get('/venue/:name/tags'
 app.get('/venue/:name'
 , function(req, res) {
     Venues = mongoose.model('Venues');
-    var venues = Venues.find({'name': req.params.name}, {}, {}, lol_error_handling)
-    res.send(venues)
+    Venues.findOne({name: req.params.name}
+    , function(err, venue) {
+        res.send(venue);
+      }
+    );
   }
 );
-
-// basic error handling
-var basic_error_handling = function(err) {
-  sys.puts('BASIC ERROR HANDLING')
-};
-
-// fake error handling
-var lol_error_handling = function(err, docs) {
-  sys.puts('LOL ERROR HANDLING')  
-};
 
 app.listen(3000);
