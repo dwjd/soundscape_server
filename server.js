@@ -153,8 +153,13 @@ app.get('/user/:email/tags'
 app.get('/user/:email/:name/:phone'
 , function(req, res) {
     Person = mongoose.model('Person');
+    var person = null;
 
-    var person = Person.find({'email': req.params.email}, {}, {}, lol_error_handling);
+    Person.findOne({email: req.params.email}
+    , function(err, p) {
+        person = p;
+      }
+    );
 
     if ( person == null ) {
       person = new Person();
