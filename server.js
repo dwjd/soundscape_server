@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var mongooseTypes = require("mongoose-types"), useTimestamps = mongooseTypes.useTimestamps;
 var Email = mongoose.SchemaTypes.Email;
 var Schema = mongoose.Schema, ObjectId = Schema.ObjectId;
+var underscore = require('underscore');
 
 // is there a song reference id we can get easily from echophone?
 var Song = new Schema({
@@ -52,20 +53,47 @@ app.get('/venue/:ll', function(req, res) {
     })
 });
 
-app.get('/song/:id'
+app.get('/song/:code'
 , function(req, res) { 
-    var song = new Song();
-    var echo_song = get_song(req.params.id, res)
-    song.artist = echo_song
-    song.save();
+    res.send(get_song(req.params.code));
 });
 
-var get_song = function(id, res) {
-  request({uri: 'http://developer.echonest.com/api/v4/song/identify?api_key=3XHF2NDEZOK0Y1CLM&code='+id}
+var echonest_key = '3XHF2NDEZOK0Y1CLM';
+
+var get_song = function(code) {
+  request({uri: 'http://developer.echonest.com/api/v4/song/identify?api_key='+echonest_key+'&code='+code}
   , function (error, response, body) {
+      Song = mongoose.model('Song');
+      var song = null;
+      sys.puts('status: ' + response.statusCode);
+
       if (!error && response.statusCode == 200) {
-        var songs = JSON.parse(body);
-        res.send(body);
+
+        var songs = JSON.parse(body).response.songs;
+
+        // Default to the best song ever if none was found
+        if ( songs.size == 0 ) {
+          song = new Song();
+          song.id = 'RICKASTLEY';
+          song.title = 'Never gonna give you up';
+          song.artist = 'Rick Astley';
+          song.save();
+        }
+
+        // Try and load a cached version of the song
+        song = Song.findById(underscore.first(songs).id);
+
+        // If the cache misses, add new info
+        if ( song.title == null ) {
+          song = new Song();
+          song.title = underscore.first(songs).title
+          song.artist = underscore.first(songs).artist_name
+          song.id = underscore.first(songs).id
+          song.save();
+        }
+        sys.puts(JSON.stringify(song));
+
+        return song;
       }
    })
 };
