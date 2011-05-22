@@ -142,7 +142,7 @@ app.get('/:user/tags', function(req, res) {
   Tags = mongoose.model('Tags');
   var tags = Tags.find({'user': req.params.user}, {}, {}, lol_error_handling);
   res.send(tags);
-}
+});
 
 // add a user
 app.get('/user/:name/:email/:phone', function(req, res) {
@@ -161,7 +161,7 @@ app.get('/user/:name/:email/:phone', function(req, res) {
   }
 
   res.send(person);
-}
+});
 
 // find user 
 app.get('/user/:email', function(req, res) {
