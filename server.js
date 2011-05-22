@@ -4,12 +4,11 @@ var Email = mongoose.SchemaTypes.Email;
 var Schema = mongoose.Schema, ObjectId = Schema.ObjectId;
 var underscore = require('underscore');
 
-// is there a song reference id we can get easily from echophone?
 var Song = new Schema({
     artist      : String
   , title       : String
   , album       : String
-  , echonest_id : ObjectId // echonest
+  , echonest_id : ObjectId
 }); 
 mongoose.model('Song', Song);
 
@@ -19,6 +18,15 @@ var Person = new Schema({
   , phone : { type: Number, min: 1000000000, max: 99999999999 }
 });
 mongoose.model('Person', Person);
+
+var Venues = new Schema({
+    name     : String
+  , distance : Number
+  , category : String
+  , icon_uri : String
+  , history  : ObjectId
+});
+mongoose.model('Venues', Venues);
 
 var Tags = new Schema({
     user_id  : ObjectId // mongo
@@ -34,22 +42,41 @@ mongoose.model('Tags', Tags);
 var app = require('express').createServer();
 var request = require('request');
 var sys = require('sys');
-var foursquare_id = 'JAQQS11NSBCQEP3RBZAVITCME54S3FSCWAZ1204KS1TMNRJY';
-var foursquare_secret = 'CLTMSOONEQ2HY4Y55RGJFUAWDRTQ5TIJ0XTIR3T4ZFL0STPF';
+var foursquare_id = 'JAQQS11NSBCQEP3RBZAVITCME54S3FSCWAZ1204KS1TMNRJY'
+  , foursquare_secret = 'CLTMSOONEQ2HY4Y55RGJFUAWDRTQ5TIJ0XTIR3T4ZFL0STPF';
 
 var db = mongoose.connect('mongodb://localhost/soundscape');
 
 // get a list of the most likely venues
-app.get('/venue/:ll', function(req, res) {
+app.get('/venue/:list/:ll', function(req, res) {
   request({uri:'https://api.foursquare.com/v2/venues/search?client_id='+foursquare_id+'&client_secret='+foursquare_secret+'&ll='+req.params.ll+'&limit=10'}
   , function (error, response, body) {
 
+      Venues = mongoose.model('Venues');
+      var venues = new Array();
+      
       if (!error && response.statusCode == 200) {
-        var venues = JSON.parse(body);
-        // TODO: sort by trending with underscore
-        // TODO: for each place id, get_place
-        res.send(body); 
+        // grab possible venues from underscore
+        var vs = underscore.first(underscore.select(JSON.parse(body).response.groups, function(group) { return group.type == req.params.list })).items;
+        //sys.puts(JSON.stringify(vs));
+        for ( var i=0, len=vs.length; i<len; ++i ){
+          var v = vs[i];
+          var venue = Venues.findById(v.id);
+          if(venue.name == null) {
+            venue = new Venues();
+            venue.name = v.name;
+            venue.distance = v.location.distance;
+            var cat = underscore.first(v.categories);
+            if( cat != null ) {
+              venue.category = cat.name;
+              venue.icon_uri = cat.icon;
+            }
+            venue.save();
+          } 
+          venues.push(venue);
+        }
       }
+      sys.puts(JSON.stringify(venues));
     })
 });
 
@@ -124,7 +151,7 @@ app.get('/venue/:venue/tags', function(req, res) {
 
 // get venue info
 app.get('/venue/:venue', function(req, res) {
-  Venue.find({'venue': req.params.venue}, {}, {}, lol_error_handling)
+  Venues.find({'venue': req.params.venue}, {}, {}, lol_error_handling)
 });
 
 // basic error handling
