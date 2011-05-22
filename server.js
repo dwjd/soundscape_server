@@ -79,14 +79,11 @@ app.get('/venue/:list/:ll', function(req, res) {
     })
 });
 
-app.get('/song/:code'
-, function(req, res) { 
-    res.send(get_song(req.params.code));
-});
-
 var echonest_key = '3XHF2NDEZOK0Y1CLM';
-
-var get_song = function(code) {
+// get a song
+app.get('/song/:code'
+  , function(req, res) {
+  var code = req.params.code;
   request({uri: 'http://developer.echonest.com/api/v4/song/identify?api_key='+echonest_key+'&code='+code}
   , function (error, response, body) {
       Song = mongoose.model('Song');
@@ -117,10 +114,10 @@ var get_song = function(code) {
           song.save();
         }
 
-        return song;
+        res.send(song);
       }
    })
-};
+});
 
 // tag a song
 app.get('/tag/:user/:venue/:song', function(req, res) {
