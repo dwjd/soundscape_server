@@ -92,27 +92,27 @@ app.get '/song/:code', (req, res) ->
         if not error and response.statusCode is 200
             songs = JSON.parse(body).response.songs
 
-            # Default to the best song ever if none was found
-            if songs.size is 0
+            # Default to the best song ever
+            if not songs.size
                 song = new Song
                 song.id = 'RICKASTLEY'
                 song.title = 'Never gonna give you up'
                 song.artist = 'Rick Astley'
                 song.save()
 
-          # Try and load a cached version of the song
-          song = Song.findById(underscore.first(songs).id)
+            # Try and load a cached version of the song
+            song = Song.findById underscore.first(songs).id
 
-          # If the cache misses, add new info
-          if song.title is null
-            song = new Song
-            song.title = underscore.first(songs).title
-            song.artist = underscore.first(songs).artist_name
-            song.id = underscore.first(songs).id
-            song.save()
+            # If the cache misses, add the new song
+            if not song.title?
+                song = new Song
+                song.title = underscore.first(songs).title
+                song.artist = underscore.first(songs).artist_name
+                song.id = underscore.first(songs).id
+                song.save()
 
-      res.send(song)
-      return
+        res.send song
+        return
 
 # the user (dis)liked the song at venue
 app.get '/tag/:user/:like/:song/:venue', (req, res) ->
@@ -138,7 +138,7 @@ app.get '/user/:email/:name/:phone', (req, res) ->
     Person.findOne {email: req.params.email}, (err, p) ->
         person = p
 
-    if !person?
+    if not person?
         person = new Person
         person.name = req.params.name
         person.email = req.params.email
