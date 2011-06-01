@@ -53,7 +53,7 @@ db = mongoose.connect 'mongodb://localhost/soundscape'
 
 # get a list of the most likely venues
 app.get '/venue/:list/:ll', (req, res) ->
-  request {uri:'https://api.foursquare.com/v2/venues/search?client_id='+foursquare_id+'&client_secret='+foursquare_secret+'&ll='+req.params.ll+'&limit=10'}, (error, response, body) ->
+  request {uri:"https://api.foursquare.com/v2/venues/search?client_id=#{foursquare_id}&client_secret=#{foursquare_secret}&ll=#{req.params.ll}&limit=10"}, (error, response, body) ->
     Venues = mongoose.model 'Venues'
     venues = new Array
     if not error and response.statusCode is 200
@@ -62,12 +62,12 @@ app.get '/venue/:list/:ll', (req, res) ->
       
       for v in vs
         venue = Venues.findById v.id
-        if venue.name is null
+        if not venue.name?
           venue = new Venues
           venue.name = v.name
           venue.distance = v.location.distance
           cat = underscore.first v.categories
-          cat?
+          if cat?
             venue.category = cat.name
             venue.icon_uri = cat.icon
           venue.save()
@@ -82,7 +82,7 @@ echonest_key = '3XHF2NDEZOK0Y1CLM'
 # get a song
 app.get '/song/:code', (req, res) ->
     code = req.params.code
-    request {uri: 'http://developer.echonest.com/api/v4/song/identify?api_key='+echonest_key+'&code='+code}, (error, response, body) ->
+    request {uri: "http://developer.echonest.com/api/v4/song/identify?api_key=#{echonest_key}&code=#{code}"}, (error, response, body) ->
         Song = mongoose.model 'Song'
         song = null
 
