@@ -64,13 +64,13 @@ app.get '/venue/:list/:ll', (req, res) ->
         venue = Venues.findById v.id
         
         # create a new venue if its not already cached
-        if not venue.name?
+        if not venue.name
           venue = new Venues
           venue.name = v.name
           venue.distance = v.location.distance
           cat = underscore.first v.categories
 
-          if cat?
+          if cat
             venue.category = cat.name
             venue.icon_uri = cat.icon
           venue.save()
