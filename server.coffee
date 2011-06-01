@@ -14,14 +14,14 @@ Song = new Schema
   album       : String
   echonest_id : ObjectId
 
-mongoose.model('Song', Song)
+mongoose.model 'Song', Song
 
 Person = new Schema
   name  : String
   email : [Email]
   phone : { type: Number, min: 1000000000, max: 99999999999 }
 
-mongoose.model('Person', Person)
+mongoose.model 'Person', Person
 
 Venues = new Schema
   name     : String
@@ -30,7 +30,7 @@ Venues = new Schema
   icon_uri : String
   history  : ObjectId
 
-mongoose.model('Venues', Venues)
+mongoose.model 'Venues', Venues
 
 Tags = new Schema
   user_id  : ObjectId # soundscape
@@ -41,7 +41,7 @@ Tags = new Schema
   date     : Date
   like     : Boolean
 
-mongoose.model('Tags', Tags)
+mongoose.model 'Tags', Tags
 
 app = require('express').createServer()
 request = require 'request'
@@ -49,30 +49,33 @@ sys = require 'sys'
 foursquare_id = 'JAQQS11NSBCQEP3RBZAVITCME54S3FSCWAZ1204KS1TMNRJY'
 foursquare_secret = 'CLTMSOONEQ2HY4Y55RGJFUAWDRTQ5TIJ0XTIR3T4ZFL0STPF'
 
-db = mongoose.connect('mongodb://localhost/soundscape')
+db = mongoose.connect 'mongodb://localhost/soundscape'
 
 # get a list of the most likely venues
 app.get '/venue/:list/:ll', (req, res) ->
-  request {uri:'https://api.foursquare.com/v2/venues/search?client_id='+foursquare_id+'&client_secret='+foursquare_secret+'&ll='+req.params.ll+'&limit=10'}, (error, response, body) ->
+  request {uri:"https://api.foursquare.com/v2/venues/search?client_id=#{foursquare_id}&client_secret=#{foursquare_secret}&ll=#{req.params.ll}&limit=10"}, (error, response, body) ->
     Venues = mongoose.model 'Venues'
-    venues = new Array
+
     if not error and response.statusCode is 200
       # grab possible venues from underscore
       vs = underscore.first(underscore.select(JSON.parse(body).response.groups, (group) -> group.type is req.params.list )).items
       
-      for v in vs
+      venues = for v in vs
         venue = Venues.findById v.id
-        if venue.name is null
+        
+        # create a new venue if its not already cached
+        if not venue.name?
           venue = new Venues
           venue.name = v.name
           venue.distance = v.location.distance
           cat = underscore.first v.categories
-          if cat isnt null
+
+          if cat?
             venue.category = cat.name
             venue.icon_uri = cat.icon
           venue.save()
-        
-        venues.push venue
+
+        venue
     res.send venues
     return
   return
@@ -82,7 +85,7 @@ echonest_key = '3XHF2NDEZOK0Y1CLM'
 # get a song
 app.get '/song/:code', (req, res) ->
     code = req.params.code
-    request {uri: 'http://developer.echonest.com/api/v4/song/identify?api_key='+echonest_key+'&code='+code}, (error, response, body) ->
+    request {uri: "http://developer.echonest.com/api/v4/song/identify?api_key=#{echonest_key}&code=#{code}"}, (error, response, body) ->
         Song = mongoose.model 'Song'
         song = null
 
@@ -113,7 +116,7 @@ app.get '/song/:code', (req, res) ->
 
 # the user (dis)liked the song at venue
 app.get '/tag/:user/:like/:song/:venue', (req, res) ->
-    Tags = mongoose.model('Tags')
+    Tags = mongoose.model 'Tags'
     tag = new Tags
     tag.user = req.params.user
     tag.venue = req.params.venue
@@ -135,7 +138,7 @@ app.get '/user/:email/:name/:phone', (req, res) ->
     Person.findOne {email: req.params.email}, (err, p) ->
         person = p
 
-    if !person?  
+    if !person?
         person = new Person
         person.name = req.params.name
         person.email = req.params.email
