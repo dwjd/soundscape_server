@@ -55,13 +55,15 @@ db = mongoose.connect 'mongodb://localhost/soundscape'
 app.get '/venue/:list/:ll', (req, res) ->
   request {uri:"https://api.foursquare.com/v2/venues/search?client_id=#{foursquare_id}&client_secret=#{foursquare_secret}&ll=#{req.params.ll}&limit=10"}, (error, response, body) ->
     Venues = mongoose.model 'Venues'
-    venues = new Array
+
     if not error and response.statusCode is 200
       # grab possible venues from underscore
       vs = underscore.first(underscore.select(JSON.parse(body).response.groups, (group) -> group.type is req.params.list )).items
       
-      for v in vs
+      venues = for v in vs
         venue = Venues.findById v.id
+        
+        # create a new venue if its not already cached
         if not venue.name?
           venue = new Venues
           venue.name = v.name
@@ -71,8 +73,8 @@ app.get '/venue/:list/:ll', (req, res) ->
             venue.category = cat.name
             venue.icon_uri = cat.icon
           venue.save()
-        
-        venues.push venue
+
+        venue
     res.send venues
     return
   return
