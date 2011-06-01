@@ -14,14 +14,14 @@ Song = new Schema
   album       : String
   echonest_id : ObjectId
 
-mongoose.model('Song', Song)
+mongoose.model 'Song', Song
 
 Person = new Schema
   name  : String
   email : [Email]
   phone : { type: Number, min: 1000000000, max: 99999999999 }
 
-mongoose.model('Person', Person)
+mongoose.model 'Person', Person
 
 Venues = new Schema
   name     : String
@@ -30,7 +30,7 @@ Venues = new Schema
   icon_uri : String
   history  : ObjectId
 
-mongoose.model('Venues', Venues)
+mongoose.model 'Venues', Venues
 
 Tags = new Schema
   user_id  : ObjectId # soundscape
@@ -41,7 +41,7 @@ Tags = new Schema
   date     : Date
   like     : Boolean
 
-mongoose.model('Tags', Tags)
+mongoose.model 'Tags', Tags
 
 app = require('express').createServer()
 request = require 'request'
@@ -49,7 +49,7 @@ sys = require 'sys'
 foursquare_id = 'JAQQS11NSBCQEP3RBZAVITCME54S3FSCWAZ1204KS1TMNRJY'
 foursquare_secret = 'CLTMSOONEQ2HY4Y55RGJFUAWDRTQ5TIJ0XTIR3T4ZFL0STPF'
 
-db = mongoose.connect('mongodb://localhost/soundscape')
+db = mongoose.connect 'mongodb://localhost/soundscape'
 
 # get a list of the most likely venues
 app.get '/venue/:list/:ll', (req, res) ->
@@ -113,7 +113,7 @@ app.get '/song/:code', (req, res) ->
 
 # the user (dis)liked the song at venue
 app.get '/tag/:user/:like/:song/:venue', (req, res) ->
-    Tags = mongoose.model('Tags')
+    Tags = mongoose.model 'Tags'
     tag = new Tags
     tag.user = req.params.user
     tag.venue = req.params.venue
